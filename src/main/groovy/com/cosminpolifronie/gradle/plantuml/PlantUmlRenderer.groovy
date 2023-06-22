@@ -2,19 +2,19 @@ package com.cosminpolifronie.gradle.plantuml
 
 import net.sourceforge.plantuml.FileFormatOption
 import net.sourceforge.plantuml.SourceStringReader
+import org.gradle.api.provider.Property
+import org.gradle.workers.WorkAction
+import org.gradle.workers.WorkParameters
 
 import javax.inject.Inject
 
-class PlantUmlRenderer implements Runnable {
-    private final PlantUmlPreparedRender preparedRender
-
-    @Inject
-    PlantUmlRenderer(PlantUmlPreparedRender preparedRender) {
-        this.preparedRender = preparedRender
+public abstract class PlantUmlRenderer implements WorkAction<PlantUmlRenderer.PlantUmlRendererParameters> {
+    public static interface PlantUmlRendererParameters extends WorkParameters {
+        Property<PlantUmlPreparedRender> getPreparedRender(); 
     }
 
     @Override
-    void run() {
+    void execute() {
         // TODO: the following can be simplified when/if the following pull request gets accepted
         // https://github.com/plantuml/plantuml/pull/220
         // all below becomes
@@ -23,6 +23,8 @@ class PlantUmlRenderer implements Runnable {
             new SourceStringReader(preparedRender.input.text).outputImage(out, new FileFormatOption(preparedRender.format, preparedRender.withMetadata))
         }
         */
+
+        def preparedRender = getParameters().getPreparedRender().get()
 
         def fileFormatOption = new FileFormatOption(preparedRender.format)
 

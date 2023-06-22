@@ -13,7 +13,6 @@ import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 import org.gradle.workers.IsolationMode
-import org.gradle.workers.WorkerConfiguration
 import org.gradle.workers.WorkerExecutor
 
 import javax.inject.Inject
@@ -58,7 +57,7 @@ abstract class PlantUmlTask extends DefaultTask {
         // local variable that references the private WorkerExecutor above
         // it needs to be referenced here in order to be accessible from a closure
         // see https://stackoverflow.com/a/40957351/6271450
-        def localWorkerExecutor = workerExecutor
+        def localWorkQueue = workerExecutor.noIsolation()
         def localInputPreparedRenderMap = inputPreparedRenderMap
         def localInputReceivedRenderMap = inputReceivedRenderMap
 
@@ -73,13 +72,9 @@ abstract class PlantUmlTask extends DefaultTask {
                 if (localInputPreparedRenderMap.containsKey(change.file)) {
                     def preparedRender = localInputPreparedRenderMap[change.file]
                     logger.lifecycle("[PlantUml] Rendering file ${preparedRender.input.toString()} to ${preparedRender.output.toString()}")
-                    localWorkerExecutor.submit(PlantUmlRenderer.class, new Action<WorkerConfiguration>() {
-                        @Override
-                        void execute(WorkerConfiguration workerConfiguration) {
-                            workerConfiguration.setIsolationMode(IsolationMode.NONE)
-                            workerConfiguration.params(preparedRender)
-                        }
-                    })
+                    localWorkQueue.submit(PlantUmlRenderer.class, parameters -> {
+                        parameters.getPreparedRender().set(preparedRender)
+                    });
                 } else {
                     throw new PlantUmlException(
                             "Input file ${change.file.toString()} declared as out of date by Gradle but not declared as an input value by the user"

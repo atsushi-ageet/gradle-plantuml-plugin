@@ -1,6 +1,6 @@
 plugins {
     id 'java-gradle-plugin'
-    id 'com.gradle.plugin-publish' version '0.10.1'
+    id 'com.gradle.plugin-publish' version '1.2.0'
     id 'groovy'
     id 'maven-publish'
 }
@@ -15,14 +15,16 @@ repositories {
 }
 
 dependencies {
-    compile 'net.sourceforge.plantuml:plantuml:1.2019.7'
+    implementation 'net.sourceforge.plantuml:plantuml:1.2019.7'
 
-    testCompile 'org.junit.jupiter:junit-jupiter-api:5.4.2'
-    testCompile 'org.junit-pioneer:junit-pioneer:0.3.0'
-    testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.2'
+    testImplementation 'org.junit-pioneer:junit-pioneer:0.3.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
 }
 
 gradlePlugin {
+    website = 'https://github.com/cosminpolifronie/gradle-plantuml-plugin'
+    vcsUrl = 'https://github.com/cosminpolifronie/gradle-plantuml-plugin'
     plugins {
         plantUmlPlugin {
             id = 'com.cosminpolifronie.gradle.plantuml'
@@ -31,14 +33,9 @@ gradlePlugin {
                     'Takes a set of diagram files together with desired output files / formats ' +
                     'and renders them with PlantUML (http://plantuml.com/).'
             implementationClass = 'com.cosminpolifronie.gradle.plantuml.PlantUmlPlugin'
+            tags.set(['plantuml'])
         }
     }
-}
-
-pluginBundle {
-    website = 'https://github.com/cosminpolifronie/gradle-plantuml-plugin'
-    vcsUrl = 'https://github.com/cosminpolifronie/gradle-plantuml-plugin'
-    tags = ['plantuml']
 }
 
 test {
